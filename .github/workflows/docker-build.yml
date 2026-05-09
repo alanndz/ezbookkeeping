@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "build_unix_time=$(date '+%s')" >> "$GITHUB_OUTPUT"
           echo "build_date=$(date '+%Y%m%d')" >> "$GITHUB_OUTPUT"
-          echo "image_name=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/ezbookkeeping-budget" >> "$GITHUB_OUTPUT"
+          echo "image_name=ghcr.io/$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')/ezbookkeeping" >> "$GITHUB_OUTPUT"
 
       - name: Build and push
         uses: docker/build-push-action@v6
