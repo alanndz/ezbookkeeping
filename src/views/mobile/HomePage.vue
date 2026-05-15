@@ -165,6 +165,8 @@
 
         <budget-overview-card :loading="loadingBudget" :budget-summary="budgetSummary" :unbudgeted="unbudgeted" />
 
+        <goals-overview-card :loading="loadingGoals" :goals="goalsOverview" />
+
         <f7-toolbar tabbar icons bottom class="main-tabbar">
             <f7-link class="link" href="/transaction/list">
                 <f7-icon f7="square_list"></f7-icon>
@@ -181,10 +183,6 @@
             <f7-link class="link" href="/statistic/transaction">
                 <f7-icon f7="chart_pie"></f7-icon>
                 <span class="tabbar-label">{{ tt('Statistics') }}</span>
-            </f7-link>
-            <f7-link class="link" href="/goals">
-                <f7-icon f7="flag_2"></f7-icon>
-                <span class="tabbar-label">{{ tt('Goals') }}</span>
             </f7-link>
             <f7-link class="link" href="/settings">
                 <f7-icon f7="gear_alt"></f7-icon>
@@ -221,6 +219,7 @@
 <script setup lang="ts">
 import AIImageRecognitionSheet from '@/components/mobile/AIImageRecognitionSheet.vue';
 import BudgetOverviewCard, { type BudgetSummaryItem, type UnbudgetedItem } from '@/views/mobile/budget/BudgetOverviewCard.vue';
+import GoalsOverviewCard, { type GoalOverviewItem } from '@/views/mobile/goals/GoalsOverviewCard.vue';
 
 import { ref, computed, useTemplateRef } from 'vue';
 import type { Router } from 'framework7/types';
@@ -274,11 +273,14 @@ const aiImageRecognitionSheet = useTemplateRef<AIImageRecognitionSheetType>('aiI
 
 const loading = ref<boolean>(true);
 const loadingBudget = ref<boolean>(true);
+const loadingGoals = ref<boolean>(true);
 const showTransactionTemplatePopover = ref<boolean>(false);
 const showAIReceiptImageRecognitionSheet = ref<boolean>(false);
 
 const budgetSummary = ref<BudgetSummaryItem[]>([]);
 const unbudgeted = ref<UnbudgetedItem[]>([]);
+
+const goalsOverview = ref<GoalOverviewItem[]>([]);
 
 interface BudgetTargetRawItem {
     id: string;
@@ -377,6 +379,31 @@ async function loadBudgetOverview(): Promise<void> {
     unbudgeted.value = unbudgetedList;
 }
 
+interface RawGoal {
+    id: string;
+    name: string;
+    accountId: string;
+    targetAmount: string;
+    targetDate: string;
+    createdAt: string;
+}
+
+async function loadGoalsOverview(): Promise<void> {
+    try {
+        const resp = await axios.get<ApiResponse<RawGoal[]>>('v1/goals/list.json');
+        goalsOverview.value = (resp.data?.result ?? []).map(g => ({
+            id: g.id,
+            name: g.name,
+            accountId: g.accountId,
+            targetAmount: Number(g.targetAmount),
+            targetDate: Number(g.targetDate),
+            createdAt: Number(g.createdAt),
+        }));
+    } catch {
+        // silently fail
+    }
+}
+
 const allTransactionTemplates = computed<TransactionTemplate[]>(() => {
     const allTemplates = transactionTemplatesStore.allVisibleTemplates;
     return allTemplates[TemplateType.Normal.type] || [];
@@ -396,6 +423,7 @@ function init(): void {
             getShareCacheImageBlob(),
             accountsStore.loadAllAccounts({ force: false }),
             transactionCategoriesStore.loadAllCategories({ force: false }).then(() => loadBudgetOverview().finally(() => { loadingBudget.value = false; })),
+            loadGoalsOverview().finally(() => { loadingGoals.value = false; }),
             transactionTemplatesStore.loadAllTemplates({ templateType: TemplateType.Normal.type,  force: false }),
             overviewStore.loadTransactionOverview({ force: false })
         ];
@@ -420,9 +448,11 @@ function init(): void {
 function reload(done?: () => void): void {
     const force = !!done;
 
-    overviewStore.loadTransactionOverview({
-        force: force
-    }).then(() => {
+    Promise.all([
+        overviewStore.loadTransactionOverview({ force: force }),
+        loadGoalsOverview(),
+        loadBudgetOverview(),
+    ]).then(() => {
         done?.();
 
         if (force) {
