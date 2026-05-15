@@ -145,7 +145,6 @@ build_backend() {
 
     if [ "$NO_TEST" = "0" ]; then
         echo "Executing backend unit testing..."
-        go clean -cache
 
         if [ -z "$SKIP_TESTS" ]; then
             go test ./... -v

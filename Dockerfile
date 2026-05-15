@@ -12,11 +12,16 @@ ENV BUILD_UNIXTIME=$BUILD_UNIXTIME
 ENV BUILD_DATE=$BUILD_DATE
 ENV CHECK_3RD_API=$CHECK_3RD_API
 ENV SKIP_TESTS=$SKIP_TESTS
+ENV NO_LINT=1
+ENV NO_TEST=1
 WORKDIR /go/src/github.com/mayswind/ezbookkeeping
+COPY go.mod go.sum ./
+RUN go mod download
 COPY . .
 RUN docker/backend-build-pre-setup.sh
 RUN apk add git gcc g++ libc-dev
-RUN ./build.sh backend
+RUN --mount=type=cache,target=/go/pkg/mod/ \
+    ./build.sh backend
 
 # Build frontend files
 FROM --platform=$BUILDPLATFORM node:24.15.0-alpine3.23 AS fe-builder
@@ -29,10 +34,13 @@ ENV BUILD_PIPELINE=$BUILD_PIPELINE
 ENV BUILD_UNIXTIME=$BUILD_UNIXTIME
 ENV BUILD_DATE=$BUILD_DATE
 WORKDIR /go/src/github.com/mayswind/ezbookkeeping
+COPY package.json package-lock.json ./
+RUN npm ci
 COPY . .
 RUN docker/frontend-build-pre-setup.sh
 RUN apk add git
-RUN ./build.sh frontend
+RUN --mount=type=cache,target=/root/.npm/ \
+    ./build.sh frontend
 
 # Package docker image
 FROM alpine:3.23.4
