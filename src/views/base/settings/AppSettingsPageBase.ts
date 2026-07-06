@@ -26,6 +26,8 @@ export function useAppSettingPageBase() {
         getAllTimezones,
         getAllTimezoneTypesUsedForStatistics,
         getAllCurrencySortingTypes,
+        getAllKeywordMatchModes,
+        getAllImageUploadQualityTypes,
         setTimeZone
     } = useI18n();
 
@@ -51,6 +53,7 @@ export function useAppSettingPageBase() {
     const allTimezones = computed<LocalizedTimezoneInfo[]>(() => getAllTimezones(getCurrentUnixTime(), true));
     const allTimezoneTypesUsedForStatistics = computed<TypeAndDisplayName[]>(() => getAllTimezoneTypesUsedForStatistics());
     const allCurrencySortingTypes = computed<TypeAndDisplayName[]>(() => getAllCurrencySortingTypes());
+    const allKeywordMatchModes = computed<TypeAndDisplayName[]>(() => getAllKeywordMatchModes());
 
     const allAutoSaveTransactionDraftTypes = computed<NameValue[]>(() => {
         return [
@@ -59,6 +62,8 @@ export function useAppSettingPageBase() {
             { name: tt('Always Show Confirmation'), value: 'confirmation' }
         ];
     });
+
+    const allImageUploadQualityTypes = computed<TypeAndDisplayName[]>(() => getAllImageUploadQualityTypes());
 
     const allReconciliationStatementDateRanges = computed(() => getAllDateRanges(DateRangeScene.Normal, {
         includeCustom: true,
@@ -114,6 +119,11 @@ export function useAppSettingPageBase() {
         set: (value) => settingsStore.setShowTagInTransactionListPage(value)
     });
 
+    const defaultKeywordMatchModeInTransactionListPage = computed<number>({
+        get: () => settingsStore.appSettings.defaultKeywordMatchModeInTransactionListPage,
+        set: (value: number) => settingsStore.setDefaultKeywordMatchModeInTransactionListPage(value)
+    });
+
     const itemsCountInTransactionListPage = computed<number>({
         get: () => settingsStore.appSettings.itemsCountInTransactionListPage,
         set: (value) => settingsStore.setItemsCountInTransactionListPage(value)
@@ -133,6 +143,21 @@ export function useAppSettingPageBase() {
     const isAutoGetCurrentGeoLocation = computed<boolean>({
         get: () => settingsStore.appSettings.autoGetCurrentGeoLocation,
         set: (value) => settingsStore.setAutoGetCurrentGeoLocation(value)
+    });
+
+    const transactionPictureQuality = computed<number>({
+        get: () => settingsStore.appSettings.transactionPictureQuality,
+        set: (value: number) => settingsStore.setTransactionPictureQuality(value)
+    });
+
+    const isAlwaysRequireConfirmationOfClipboardContentBeforeSubmission = computed<boolean>({
+        get: () => settingsStore.appSettings.alwaysRequireConfirmationOfClipboardContentBeforeSubmission,
+        set: (value: boolean) => settingsStore.setAlwaysRequireConfirmationOfClipboardContentBeforeSubmission(value)
+    });
+
+    const isAutoUploadTransactionPictureForAIRecognition = computed<boolean>({
+        get: () => settingsStore.appSettings.autoUploadTransactionPictureForAIRecognition,
+        set: (value: boolean) => settingsStore.setAutoUploadTransactionPictureForAIRecognition(value)
     });
 
     const currencySortByInExchangeRatesPage = computed<number>({
@@ -252,19 +277,25 @@ export function useAppSettingPageBase() {
         allTimezones,
         allTimezoneTypesUsedForStatistics,
         allCurrencySortingTypes,
+        allKeywordMatchModes,
         allAutoSaveTransactionDraftTypes,
+        allImageUploadQualityTypes,
         allReconciliationStatementDateRanges,
         timeZone,
         hasAnyAccount,
         hasAnyVisibleAccount,
         hasAnyTransactionCategory,
         isAutoUpdateExchangeRatesData,
+        transactionPictureQuality,
+        isAlwaysRequireConfirmationOfClipboardContentBeforeSubmission,
+        isAutoUploadTransactionPictureForAIRecognition,
         showAccountBalance,
         showAmountInHomePage,
         itemsCountInTransactionListPage,
         timezoneUsedForStatisticsInHomePage,
         showTotalAmountInTransactionListPage,
         showTagInTransactionListPage,
+        defaultKeywordMatchModeInTransactionListPage,
         autoSaveTransactionDraft,
         isAutoGetCurrentGeoLocation,
         currencySortByInExchangeRatesPage,
