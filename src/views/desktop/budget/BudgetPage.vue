@@ -1052,6 +1052,7 @@ async function loadStatsForMonth(year: number, month: number): Promise<void> {
         endTime: monthLastUnixTime(year, month),
         tagFilter: '',
         keyword: '',
+        matchMode: 0,
         useTransactionTimezone: false,
     });
     const items = resp.data?.result?.items ?? [];

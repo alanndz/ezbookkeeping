@@ -322,7 +322,7 @@ async function loadBudgetOverview(): Promise<void> {
 
     const [budgetResp, statsResp, savingsResp] = await Promise.all([
         axios.get<ApiResponse<BudgetTargetRawItem[]>>(`v1/budget/targets.json?year=${year}&month=${month}`),
-        services.getTransactionStatistics({ startTime, endTime, tagFilter: '', keyword: '', useTransactionTimezone: false }),
+        services.getTransactionStatistics({ startTime, endTime, tagFilter: '', keyword: '', matchMode: 0, useTransactionTimezone: false }),
         axios.get<ApiResponse<{ items: SavingsActualRawItem[] }>>(`v1/budget/savings-actuals.json?year=${year}&month=${month}`)
     ]);
 
